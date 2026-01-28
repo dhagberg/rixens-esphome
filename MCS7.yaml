@@ -2,6 +2,7 @@ esphome:
   name: esp-web-tools-example-d07858
   friendly_name: Rixens Heat
   name_add_mac_suffix: false
+  compile_process_limit: 1
 
 esp32:
   board: esp32dev
