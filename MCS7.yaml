@@ -435,7 +435,7 @@ switch:
               - lambda: |-
                   return id(this_thermostat).mode == CLIMATE_MODE_OFF;
               - lambda: |-
-                  return id(this_thermostat).custom_preset == "Standby";
+                  return id(this_thermostat).get_custom_preset() == "Standby";
           then:
             - switch.turn_off: furnace_id
 
