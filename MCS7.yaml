@@ -37,8 +37,8 @@ status_led:
 
 canbus:
   - platform: esp32_can
-    tx_pin: GPIO_NUM_5
-    rx_pin: GPIO_NUM_4
+    tx_pin: GPIO5
+    rx_pin: GPIO4
     can_id: 0x788
     bit_rate: 250kbps
     use_extended_id: false
@@ -116,12 +116,12 @@ canbus:
                   id(electric_id).publish_state(false);
                 }
                 //preheat selected
-                bool preheatSelected = x[6] & 0b10000000; // Bit 55 in the payload
-                if(preheatSelected){
-                  id(preheat_id).publish_state(true);
-                } else {
-                  id(preheat_id).publish_state(false);
-                }
+                //bool preheatSelected = x[6] & 0b10000000; // Bit 55 in the payload
+                //if(preheatSelected){
+                //  id(preheat_id).publish_state(true);
+                //} else {
+                //  id(preheat_id).publish_state(false);
+                //}
               }
 
 sensor:
@@ -309,13 +309,13 @@ climate:
           then:
             - switch.turn_off: furnace_id
             - switch.turn_off: electric_id
-    heat_mode:
-      # If the Mode is set to Heat, but the engine is off, then the furnace is turned on (to ensure there is a heat source)
-      - if:
-          condition:
-            - binary_sensor.is_off: d_plus_sensor
-          then:
-            - switch.turn_on: furnace_id
+    #heat_mode:
+    #  # If the Mode is set to Heat, but the engine is off, then the furnace is turned on (to ensure there is a heat source)
+    #  - if:
+    #      condition:
+    #        - binary_sensor.is_off: d_plus_sensor
+    #      then:
+    #        - switch.turn_on: furnace_id
     
 
     # define presets here to use within HA
@@ -417,14 +417,14 @@ switch:
     icon: mdi:water-thermometer
     on_turn_on:
       - canbus.send: [0x06, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
-      - if:
-          # turn on furnace if engine is off
-          condition:
-            and:
-              - switch.is_off: furnace_id
-              - binary_sensor.is_off: d_plus_sensor
-          then:
-            - switch.turn_on: furnace_id
+      #- if:
+      #    # turn on furnace if engine is off
+      #    condition:
+      #      and:
+      #        - switch.is_off: furnace_id
+      #        - binary_sensor.is_off: d_plus_sensor
+      #    then:
+      #      - switch.turn_on: furnace_id
     on_turn_off:
       - canbus.send: [0x06, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
       # When Hot Water switch is turned off: If climate Mode is Off or Preset is Standby, then turn off furnace
