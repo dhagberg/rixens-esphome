@@ -13,10 +13,11 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "xxxxx"
+    key: oN0BLcGwiR2CkbM8tQ+78Y4x4Mz7X5PuUF+0IoR5uTo=
 
 ota:
-  password: "xxxxx"
+  - platform: esphome
+    password: !secret ota_password
 
 wifi:
   ssid: !secret wifi_ssid
@@ -36,8 +37,8 @@ status_led:
 
 canbus:
   - platform: esp32_can
-    tx_pin: GPIO17
-    rx_pin: GPIO16
+    tx_pin: GPIO_NUM_5
+    rx_pin: GPIO_NUM_4
     can_id: 0x788
     bit_rate: 250kbps
     use_extended_id: false
@@ -210,32 +211,32 @@ sensor:
     accuracy_decimals: 1
 
 
-binary_sensor:
-  # import Home Assistant sensor to override van ignition running - D+ (not necessary if you run a wire to the van's D+ ignition line)
-  # this sensor controls if Rixens thinks the engine is on - it simply overrides the default D+ input (a hardwire to the ignition D+)
-  - platform: homeassistant
-    id: d_plus_sensor
-    entity_id: binary_sensor.van_running
-    on_state:
-      then:
-        # tell Rixens engine is running (d+)
-        - if:
-            condition:
-              binary_sensor.is_on: d_plus_sensor
-            then:
-              - canbus.send: [0x0B, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
-              - delay: 10ms
-            else:
-              - canbus.send: [0x0B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
-              - delay: 10ms
-        # if the engine is switched off, but climate is in heat mode or hot water is on, turn on furnace to ensure continued heating
-        - if:
-            condition:
-              or:
-                - lambda: 'return id(this_thermostat).mode == CLIMATE_MODE_HEAT;'
-                - switch.is_on: hot_water_id
-            then:
-              - switch.turn_on: furnace_id
+#binary_sensor:
+#  # import Home Assistant sensor to override van ignition running - D+ (not necessary if you run a wire to the van's D+ ignition line)
+#  # this sensor controls if Rixens thinks the engine is on - it simply overrides the default D+ input (a hardwire to the ignition D+)
+#  - platform: homeassistant
+#    id: d_plus_sensor
+#    entity_id: binary_sensor.van_running
+#    on_state:
+#      then:
+#        # tell Rixens engine is running (d+)
+#        - if:
+#            condition:
+#              binary_sensor.is_on: d_plus_sensor
+#            then:
+#              - canbus.send: [0x0B, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+#              - delay: 10ms
+#            else:
+#              - canbus.send: [0x0B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+#              - delay: 10ms
+#        # if the engine is switched off, but climate is in heat mode or hot water is on, turn on furnace to ensure continued heating
+#        - if:
+#            condition:
+#              or:
+#                - lambda: 'return id(this_thermostat).mode == CLIMATE_MODE_HEAT;'
+#                - switch.is_on: hot_water_id
+#            then:
+#              - switch.turn_on: furnace_id
 
 fan:
   # using a Speed Fan to manage the rixen's fan via a float output (below) - easier to control from Climate Thermostat and in Home Assistant if desired
@@ -438,20 +439,20 @@ switch:
             - switch.turn_off: furnace_id
 
   # Engine Pre-heat
-  - platform: template
-    name: Engine Pre-Heat
-    id: preheat_id
-    icon: mdi:radiator
-    optimistic: false
-    restore_mode: RESTORE_DEFAULT_OFF
-    turn_on_action:
-      - canbus.send: [0x07, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
-      - delay: 10ms
-      # ensure furnace is on to pre-heat engine
-      - switch.turn_on: furnace_id
-    turn_off_action:
-      - canbus.send: [0x07, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
-      - delay: 10ms
+  #- platform: template
+  #  name: Engine Pre-Heat
+  #  id: preheat_id
+  #  icon: mdi:radiator
+  #  optimistic: false
+  #  restore_mode: RESTORE_DEFAULT_OFF
+  #  turn_on_action:
+  #    - canbus.send: [0x07, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+  #    - delay: 10ms
+  #    # ensure furnace is on to pre-heat engine
+  #    - switch.turn_on: furnace_id
+  #  turn_off_action:
+  #    - canbus.send: [0x07, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+  #    - delay: 10ms
 
   # Enable Thermostat property does not seem to be able to be set via CAN Bus at the moment
   # - platform: template
