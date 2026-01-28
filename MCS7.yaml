@@ -1,6 +1,7 @@
 esphome:
-  name: rixens-heat
+  name: esp-web-tools-example-d07858
   friendly_name: Rixens Heat
+  name_add_mac_suffix: false
 
 esp32:
   board: esp32dev
