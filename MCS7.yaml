@@ -5,9 +5,11 @@ esphome:
   compile_process_limit: 1
 
 esp32:
-  board: esp32dev
+  board: esp32doit-devkit-v1
   framework:
     type: arduino
+    advanced: 
+      minimum_chip_revision: "3.1"
 
 # Enable logging
 logger:
@@ -34,7 +36,7 @@ captive_portal:
 
 status_led:
   pin:
-    number: GPIO13
+    number: GPIO2
 
 
 canbus:
@@ -514,3 +516,4 @@ switch:
     turn_off_action:
       - canbus.send: [0x05, 0x00, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
       - delay: 10ms
+
